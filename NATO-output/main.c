@@ -15,13 +15,16 @@ static  const char *nato[] = {
 
 //valgrind says there are no mem leaks even with -r -f t.txt but there is some garbled output. check bounds on my printfs
 int
-tl_separate_by_spaces(const char *src, char ***dest){
+tl_snsplitl(const char *src, char ***dest, const size_t n){
 
   
   int s = 0; 
   int l_d = 0;
   int isspace = 1;
-  char **list = (char **)malloc(sizeof(char **));
+
+  if(*dest == NULL){
+      (*dest) = (char **)malloc(sizeof(char**));
+  }
 
   while(1){
   const char *end_of_word = strchr(src+s, ' ');
@@ -42,13 +45,12 @@ tl_separate_by_spaces(const char *src, char ***dest){
   char *w = (char *)malloc((1+dist)*sizeof(char));
   strncpy(w, src+s, dist);
   w[dist+1] = '\0';
-  list = (char **)realloc(list, sizeof(char *)*(l_d+1));
-  list[l_d] = w;
+  (*dest) = (char **)realloc((*dest), sizeof(char *)*(l_d+1));
+  (*dest)[l_d] = w;
   l_d++;
   s+=dist;
   if(isspace) s++;
   }
-  *dest = list; 
   return l_d;
 }
 
@@ -62,7 +64,7 @@ r_nato_fgets(FILE * in){
     }
     int s = 0;
     char **items = NULL;
-    int l_items = tl_separate_by_spaces(line, &items);
+    int l_items = tl_snsplitl(line, &items, s);
     if (l_items == -1){
       perror("separate_by_spaces");
       free(line);
@@ -72,7 +74,6 @@ r_nato_fgets(FILE * in){
 
     int i = 0;
     while(i < l_items){
-      
       for(int j = 0; j < sizeof(nato)/sizeof(char *); j++){
         if (strcmp(items[i],nato[j]) == 0){
           fprintf(stdout,"%c",nato[j][0]);
