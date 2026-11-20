@@ -13,7 +13,7 @@ static  const char *nato[] = {
 };
 
 
-#define MAX_WORD_LEN 512
+//valgrind says there are no mem leaks even with -r -f t.txt but there is some garbled output. check bounds on my printfs
 int
 tl_separate_by_spaces(const char *src, char ***dest){
 
@@ -45,7 +45,6 @@ tl_separate_by_spaces(const char *src, char ***dest){
   list = (char **)realloc(list, sizeof(char *)*(l_d+1));
   list[l_d] = w;
   l_d++;
-  printf("read %ld chars into the string: %s\n", dist, w);
   s+=dist;
   if(isspace) s++;
   }
@@ -53,8 +52,8 @@ tl_separate_by_spaces(const char *src, char ***dest){
   return l_d;
 }
 
-int r_nato_fgets(FILE * in){
-  char word[MAX_WORD_LEN]; 
+int
+r_nato_fgets(FILE * in){
   char *line = NULL;
   size_t n = 0; 
   while ((n = getline(&line, &n, in)) != -1){
@@ -65,7 +64,7 @@ int r_nato_fgets(FILE * in){
     char **items = NULL;
     int l_items = tl_separate_by_spaces(line, &items);
     if (l_items == -1){
-      perror("seperate_by_spaces");
+      perror("separate_by_spaces");
       free(line);
       free(items); // < may leak memory by not freeing each item 
       return -1;
@@ -73,6 +72,12 @@ int r_nato_fgets(FILE * in){
 
     int i = 0;
     while(i < l_items){
+      
+      for(int j = 0; j < sizeof(nato)/sizeof(char *); j++){
+        if (strcmp(items[i],nato[j]) == 0){
+          fprintf(stdout,"%c",nato[j][0]);
+        }
+      }
       free((char *)items[i]);
       i++;
     }
@@ -85,7 +90,8 @@ int r_nato_fgets(FILE * in){
   return 0;
 }
 
-int nato_fgets(FILE * in){
+int
+nato_fgets(FILE * in){
   
   char *line = NULL;
   size_t n = 0; 
