@@ -14,23 +14,22 @@ static  const char *nato[] = {
 int nato_fgets(FILE * in){
   char *line = NULL;
   size_t n = 0; 
-  while (getline(&line, &n, in) == -1){
-    perror("getline");
-    free(line);
-    return -1;
-  }
-  if (line[n] == '\n'){
-    line[n] = '\0';
-    n--;
-  }
-  for(int i = 0 ; i < n ; i++){
-    char line_c = line[i];
-    for(int j = 0; j < sizeof(nato)/sizeof(char *); j++){
-      if (toupper(line_c) == nato[j][0]){
-        fprintf(stdout,"%s ",nato[j]);
+  while ((n = getline(&line, &n, in)) != -1){
+    if (n == 1 && line[0] == '\n'){
+      break;
+    }
+    for(int i = 0 ; i < n ; i++){
+      char line_c = line[i];
+      for(int j = 0; j < sizeof(nato)/sizeof(char *); j++){
+        if (toupper(line_c) == nato[j][0]){
+          fprintf(stdout,"%s ",nato[j]);
+        }
       }
     }
+    free(line);
+    line = NULL;
   }
+
   free(line);
   return 0;
 }
@@ -52,7 +51,7 @@ int main(int argc, char * argv[]){
    }
   }else if(strcmp("-s", argv[1]) == 0){
   }
- rc = nato_fgets(stdin); 
+ rc = nato_fgets(f_in); 
  if(f_in != stdin){
    fclose(f_in);
  }

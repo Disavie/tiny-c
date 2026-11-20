@@ -1,0 +1,6 @@
+Remember to use integer variables when processing text
+from a file. The EOF flag that marks the end of a file is an
+int value, not a char value. The while statement in the code
+is careful to extract a character from the file as well as
+evaluate the character to determine when the operation is
+over.
