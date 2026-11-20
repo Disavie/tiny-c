@@ -80,7 +80,8 @@ int r_nato_fgets(FILE * in){
     free(line);
     line = NULL;
   }
-  free(line);
+  if(line != NULL){free(line);}
+
   return 0;
 }
 
