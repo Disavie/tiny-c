@@ -14,34 +14,42 @@ static  const char *nato[] = {
 
 
 #define MAX_WORD_LEN 512
-int tl_separate_by_spaces(const char *src, char **dest){
+int
+tl_separate_by_spaces(const char *src, char ***dest){
 
   
   int s = 0; 
   int l_d = 0;
+  int isspace = 1;
+  char **list = (char **)malloc(sizeof(char **));
 
   while(1){
   const char *end_of_word = strchr(src+s, ' ');
   if(end_of_word == NULL){
+    isspace = 0;
     end_of_word = strchr(src+s,'\n');
     if(end_of_word == NULL){
       end_of_word = strchr(src+s, '\0');
       if(end_of_word == NULL){
-        return -1;
+        break;
       }
     }
   }
-  size_t dist = end_of_word - src+s;
-  char *w = (char *)malloc(1+dist*sizeof(char));
+  size_t dist = end_of_word - (src+s);
+  if(dist == 0){
+    break;
+  }
+  char *w = (char *)malloc((1+dist)*sizeof(char));
   strncpy(w, src+s, dist);
   w[dist+1] = '\0';
-  dest = (char **)realloc(dest, sizeof(char *)*l_d+1);
-  dest[l_d] = w;
+  list = (char **)realloc(list, sizeof(char *)*(l_d+1));
+  list[l_d] = w;
   l_d++;
   printf("read %ld chars into the string: %s\n", dist, w);
   s+=dist;
+  if(isspace) s++;
   }
-
+  *dest = list; 
   return l_d;
 }
 
@@ -55,7 +63,7 @@ int r_nato_fgets(FILE * in){
     }
     int s = 0;
     char **items = NULL;
-    int l_items = tl_separate_by_spaces(line, items);
+    int l_items = tl_separate_by_spaces(line, &items);
     if (l_items == -1){
       perror("seperate_by_spaces");
       free(line);
@@ -65,14 +73,13 @@ int r_nato_fgets(FILE * in){
 
     int i = 0;
     while(i < l_items){
-      free((void *)items[i]);
+      free((char *)items[i]);
       i++;
     }
     free(items);
     free(line);
     line = NULL;
   }
-
   free(line);
   return 0;
 }
