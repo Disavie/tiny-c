@@ -17,48 +17,58 @@ static  const char *nato[] = {
 int
 tl_snsplitl(const char *src, char ***dest, const size_t n){
 
-  
   int s = 0; 
   int l_d = 0;
-  int isspace = 1;
 
   if(*dest == NULL){
       (*dest) = (char **)malloc(sizeof(char**));
   }
 
   while(1){
-  const char *end_of_word = strchr(src+s, ' ');
-  if(end_of_word == NULL){
-    isspace = 0;
-    end_of_word = strchr(src+s,'\n');
+    const char *end_of_word = strchr(src+s, ' ');
+
     if(end_of_word == NULL){
-      end_of_word = strchr(src+s, '\0');
+      end_of_word = strchr(src+s,'\n');
       if(end_of_word == NULL){
-        break;
+        end_of_word = strchr(src+s, '\0');
+        if(end_of_word == NULL){
+          break;
+        }
       }
     }
-  }
-  size_t dist = end_of_word - (src+s);
-  if(dist == 0){
-    break;
-  }
-  char *w = (char *)malloc((1+dist)*sizeof(char));
-  strncpy(w, src+s, dist);
-  w[dist+1] = '\0';
-  (*dest) = (char **)realloc((*dest), sizeof(char *)*(l_d+1));
-  (*dest)[l_d] = w;
-  l_d++;
-  s+=dist;
-  if(isspace) s++;
+    size_t dist = end_of_word - (src+s);
+    if(dist == 0){
+      break;
+    }
+    char *w = (char *)malloc((1+dist)*sizeof(char));
+    strncpy(w, src+s, dist);
+    w[dist] = '\0';
+    (*dest) = (char **)realloc((*dest), sizeof(char *)*(l_d+1));
+    (*dest)[l_d] = w;
+    l_d++;
+    s+=dist+1;
   }
   return l_d;
+}
+
+char **
+tl_sntolower(char ** dest, const char * w, const size_t n){
+  if(*dest == NULL){
+    (*dest) = (char *)malloc(sizeof(char *));
+  }
+  (*dest) = strncpy((*dest), w, n);
+  for(size_t i = 0; i < n; i++){
+    (*dest)[i] = (char)tolower((*dest)[i]);
+  }
+  return dest;
 }
 
 int
 r_nato_fgets(FILE * in){
   char *line = NULL;
+  size_t MAX_LINE = 256;
   size_t n = 0; 
-  while ((n = getline(&line, &n, in)) != -1){
+  while ((n = getline(&line, &MAX_LINE, in)) != -1){
     if (n == 1 && line[0] == '\n'){
       break;
     }
@@ -74,16 +84,22 @@ r_nato_fgets(FILE * in){
 
     int i = 0;
     while(i < l_items){
+      char * item_lower = NULL;
+      tl_sntolower(&item_lower, items[i], strlen(items[i]));
       for(int j = 0; j < sizeof(nato)/sizeof(char *); j++){
-        if (strcmp(items[i],nato[j]) == 0){
+        char * nato_lower = NULL;
+        tl_sntolower(&nato_lower, nato[j], strlen(nato[j]));
+        if (strcmp(nato_lower,item_lower) == 0){
           fprintf(stdout,"%c",nato[j][0]);
         }
+        free(nato_lower);
       }
+
+      free(item_lower);
       free((char *)items[i]);
       i++;
     }
     free(items);
-    free(line);
     line = NULL;
   }
   if(line != NULL){free(line);}
@@ -128,20 +144,20 @@ int main(int argc, char * argv[]){
   int reverse = 0; // <reverse indicates nato -> english, default is off
   int i = 1;
   while(i < argc){
-  // Check -[opt] [input] options first
-    if(strcmp("-f",argv[i]) == 0){
-     f_in = fopen(argv[++i],"r"); 
-     if(f_in == NULL){
-      perror("fopen\n");
-      return EXIT_FAILURE;
-     }
-    }else {
+    if(argv[i][0] == '-'){
       for(int j = 1; j < strlen(argv[i]); j++){
         switch (argv[i][j]){
           case 's' :
             f_in = stdin; break;
           case 'r' :
             reverse = 1; break;
+          case 'f' :
+             f_in = fopen(argv[++i],"r"); 
+             if(f_in == NULL){
+              perror("fopen\n");
+              return EXIT_FAILURE;
+             }
+             break;
         }
       }
     }
