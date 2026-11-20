@@ -37,6 +37,9 @@ tl_snsplitl(const char *src, char ***dest, const size_t n){
       }
     }
     size_t dist = end_of_word - (src+s);
+    if(src+dist > src+n){
+      return -1;
+    }
     if(dist == 0){
       break;
     }
@@ -74,7 +77,7 @@ r_nato_fgets(FILE * in){
     }
     int s = 0;
     char **items = NULL;
-    int l_items = tl_snsplitl(line, &items, s);
+    int l_items = tl_snsplitl(line, &items, n);
     if (l_items == -1){
       perror("separate_by_spaces");
       free(line);
@@ -99,6 +102,7 @@ r_nato_fgets(FILE * in){
       free((char *)items[i]);
       i++;
     }
+    fprintf(stdout,"\n");
     free(items);
     line = NULL;
   }
