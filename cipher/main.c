@@ -6,11 +6,15 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <getopt.h>
 
+
+#define LONG_OPT_CNT 10
 
 int rc = 0;
 
 void to_uppercase();
+void to_hex();
 void randomize_case();
 void caesar_cipher(int key);
 
@@ -19,16 +23,22 @@ int
 main(int argc, char ** argv){
     int rc = 0;
     char opt = 0;
-    char *valid_opts = "crk:";
+    char *ops = "crk:h";
     int randomize = 0;
     int to_caps = 0;
     int cipher = 0;
     int key = 0;
+    int hex = 0;
+
+    struct option long_opts[LONG_OPT_CNT] = {
+        {"to-hex",    0, NULL,      'h'},
+        {"cipher",    1, NULL,      'k'},
+        {"to-caps",   0, NULL,      'c'},
+        {"randomize", 0, NULL,      'r'},
+    };
     srandom(time(NULL));
 
-
-    while ((opt = getopt(argc,argv,valid_opts)) != -1){
-
+    while ((opt = getopt_long(argc,argv, ops, long_opts, NULL)) != -1){
         if( opt == '?' ){
             exit(EXIT_FAILURE);
         }
@@ -43,9 +53,13 @@ main(int argc, char ** argv){
                 cipher = 1;
                 key = atoi(optarg);
                 break;
+            case 'h':
+                hex = 1;
+                break;
+                    
         }
     }
-    printf("%d\n",key);
+    printf("%d\n",cipher);
     if(to_caps){
         to_uppercase();
     }
@@ -54,6 +68,9 @@ main(int argc, char ** argv){
     }
     if(cipher){
         caesar_cipher(key);
+    }
+    if(hex){
+        to_hex();
     }
 
 
@@ -118,3 +135,19 @@ caesar_cipher(int key){
     printf("\n");
 }
 
+void
+to_hex(){
+    int c;
+    while((c = fgetc(stdin)) != EOF){
+        if(isalnum(c)){
+            fprintf(stdout,"%x",c - '0');
+        }else{
+            rc = fputc(c,stdout);
+        }
+        fflush(stdout);
+        if( rc  == EOF){
+            break;
+        }
+    }
+    printf("\n");
+}
