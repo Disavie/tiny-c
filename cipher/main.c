@@ -39,7 +39,7 @@ main(int argc, char ** argv){
                 break;
             case 'k':
                 cipher = 1;
-                key = atoi(argv[argc+1]);
+                key = atoi(optarg);
                 break;
         }
     }
