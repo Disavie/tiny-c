@@ -104,8 +104,7 @@ void
 caesar_cipher(int key){
     int c;
     while((c = fgetc(stdin)) != EOF){
-        c = (int) tolower((char)c);
-        if (c >= 'a' && c <= 'z'){
+        if (tolower(c) >= 'a' && tolower(c) <= 'z'){
             c -= 'a';
             c = (c + key)%26;
             c += 'a';
