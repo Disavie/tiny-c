@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <ctype.h>
+
 
 int rc = 0;
 
@@ -103,11 +105,10 @@ caesar_cipher(int key){
     int c;
     int caps_diff = abs('a' - 'A');
     while((c = fgetc(stdin)) != EOF){
-
-        if ((c > 'a' && c < 'z') ||(c > 'A' && c < 'Z' )){
-            if( random()%2 ==0 ){
-                c = c - caps_diff;
-            }
+        c = (int) tolower((char)c);
+        //printf("%c %d \t" , c, c);
+        if (c >= 'a' && c <= 'z'){
+            c = (c + key)%('z');
         }
         rc = fputc(c,stdout);
         fflush(stdout);
