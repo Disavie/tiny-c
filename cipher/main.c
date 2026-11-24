@@ -13,6 +13,7 @@
 
 int rc = 0;
 
+void niceify_me();
 void to_uppercase();
 void to_hex();
 void randomize_case();
@@ -29,12 +30,14 @@ main(int argc, char ** argv){
     int cipher = 0;
     int key = 0;
     int hex = 0;
+    int nice = 0;
 
     struct option long_opts[LONG_OPT_CNT] = {
         {"to-hex",    0, NULL,      'h'},
         {"cipher",    1, NULL,      'k'},
         {"to-caps",   0, NULL,      'c'},
         {"randomize", 0, NULL,      'r'},
+        {"niceify",   0, NULL,      'n'},
     };
     srandom(time(NULL));
 
@@ -56,6 +59,9 @@ main(int argc, char ** argv){
             case 'h':
                 hex = 1;
                 break;
+            case 'n':
+                nice = 1;
+                break;
                     
         }
     }
@@ -71,6 +77,9 @@ main(int argc, char ** argv){
     }
     if(hex){
         to_hex();
+    }
+    if(nice){
+        niceify_me();
     }
 
 
@@ -147,6 +156,30 @@ to_hex(){
         fflush(stdout);
         if( rc  == EOF){
             break;
+        }
+    }
+    printf("\n");
+}
+
+void
+niceify_me(){
+    int c;
+    int i = 0;
+    char buf[512] = {0};
+    char *evilword = "hate";
+    char *niceword = "love";
+    while((c = fgetc(stdin)) != EOF){
+        if(c != '\n')
+            buf[i++] = c;
+        else{
+            char *t;
+            while((t = strstr(buf,evilword)) != NULL){
+                memcpy(t,niceword, strlen(niceword));
+            }
+            buf[i] = '\n';
+            fprintf(stdout,"%s",buf);
+            i = 0;
+            memset(buf, 0, sizeof(buf));
         }
     }
     printf("\n");
